@@ -1,0 +1,86 @@
+name: Validate Agent Skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate Agent Skills Specification & Link Integrity
+        run: |
+          python3 -c "
+          import os
+          import re
+          import sys
+
+          errors = []
+          skills_dir = 'skills'
+
+          if not os.path.isdir(skills_dir):
+              print(f'Error: Directory {skills_dir} not found')
+              sys.exit(1)
+
+          for skill_name in sorted(os.listdir(skills_dir)):
+              skill_path = os.path.join(skills_dir, skill_name)
+              if not os.path.isdir(skill_path):
+                  continue
+
+              # 1. Directory naming check (lowercase kebab-case)
+              if not re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', skill_name):
+                  errors.append(f'{skill_name}: Directory name must be lowercase kebab-case')
+
+              skill_md_path = os.path.join(skill_path, 'SKILL.md')
+              if not os.path.isfile(skill_md_path):
+                  errors.append(f'{skill_name}: Missing required entry point SKILL.md')
+                  continue
+
+              with open(skill_md_path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+
+              # 2. YAML frontmatter check
+              fm_match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
+              if not fm_match:
+                  errors.append(f'{skill_name}/SKILL.md: Missing valid YAML frontmatter enclosed in ---')
+              else:
+                  fm_text = fm_match.group(1)
+                  has_name = re.search(r'^name:\s*[\"\']?([a-z0-9-]+)[\"\']?', fm_text, re.MULTILINE)
+                  has_desc = re.search(r'^description:\s*(.+)', fm_text, re.MULTILINE)
+                  
+                  if not has_name:
+                      errors.append(f'{skill_name}/SKILL.md: Frontmatter must include valid name field')
+                  elif has_name.group(1) != skill_name:
+                      errors.append(f'{skill_name}/SKILL.md: Frontmatter name ({has_name.group(1)}) must match directory name ({skill_name})')
+
+                  if not has_desc:
+                      errors.append(f'{skill_name}/SKILL.md: Frontmatter must include non-empty description field')
+
+              # 3. Internal markdown relative link check
+              # Find [text](relative/path.md)
+              links = re.findall(r'\[([^\]]+)\]\(([^)]+)\)', content)
+              for text, target in links:
+                  if target.startswith('http://') or target.startswith('https://') or target.startswith('#') or target.startswith('mailto:'):
+                      continue
+                  target_path = os.path.normpath(os.path.join(skill_path, target.split('#')[0]))
+                  if not os.path.exists(target_path):
+                      errors.append(f'{skill_name}/SKILL.md: Broken internal link -> {target} (Resolved: {target_path})')
+
+          if errors:
+              print('\n❌ Agent Skills validation failed:')
+              for err in errors:
+                  print(f'  - {err}')
+              sys.exit(1)
+          else:
+              print('\n✅ All Agent Skills passed specification and link validation successfully!')
+          "
