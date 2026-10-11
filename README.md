@@ -22,12 +22,39 @@ When generating or editing UI code, AI agents often clutter interfaces: adding u
 
 ---
 
-## Installation
+## Installation & Usage
 
-Install directly into your project using the standard `skills` CLI:
+### Option A: Install into Project Workspace
+Install directly into your repository using the standard `skills` CLI:
 
 ```bash
 npx skills add irfangani/ui-skills --skill ui-visual-balance
+```
+
+### Option B: Quick Use (Without Installing)
+Execute the skill on-demand for a single task without adding any files to your project:
+
+```bash
+# Pipe directly to Claude Code
+npx skills use irfangani/ui-skills@ui-visual-balance | claude
+
+# Or launch with a specific agent
+npx skills use irfangani/ui-skills --skill ui-visual-balance --agent claude-code
+```
+
+### Option C: Global Install (All Projects)
+Install once to make the skill globally available across all projects on your machine without modifying individual repositories:
+
+```bash
+npx skills add irfangani/ui-skills --skill ui-visual-balance -g
+```
+
+### Option D: Direct Remote Prompting
+Point any AI chat model or agent directly to the raw specification URL without installing:
+
+```text
+Follow the visual balance principles in:
+https://raw.githubusercontent.com/irfangani/ui-skills/main/skills/ui-visual-balance/SKILL.md
 ```
 
 
