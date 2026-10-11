@@ -1,0 +1,34 @@
+{
+  "name": "ui-skills",
+  "version": "0.1.0",
+  "description": "Agent Skills for UI visual balance, 60/30/10 color distribution, intentional whitespace, and hierarchy.",
+  "main": "skills/ui-visual-balance/SKILL.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irfangani/ui-skills.git"
+  },
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "ui",
+    "ux",
+    "visual-balance",
+    "design-system",
+    "ai-agent",
+    "claude-code",
+    "gemini-cli",
+    "cursor"
+  ],
+  "author": "Gani <irfangani.r@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/irfangani/ui-skills/issues"
+  },
+  "homepage": "https://github.com/irfangani/ui-skills#readme",
+  "files": [
+    "skills/**/*",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
+  ]
+}
